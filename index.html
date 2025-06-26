@@ -1,0 +1,253 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Of Visuals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for animations and specific tweaks */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hamburger div {
+            transition: all 0.3s ease;
+        }
+        .hamburger.active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active .line2 {
+            opacity: 0;
+        }
+        .hamburger.active .line3 {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            .nav-links.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800">World Of Visuals</div>
+            <div class="hamburger md:hidden cursor-pointer">
+                <div class="line1 w-6 h-0.5 bg-gray-800 mb-1"></div>
+                <div class="line2 w-6 h-0.5 bg-gray-800 mb-1"></div>
+                <div class="line3 w-6 h-0.5 bg-gray-800"></div>
+            </div>
+            <ul class="nav-links md:flex space-x-6 text-gray-800 hidden md:block">
+                <li><a href="#home" class="hover:text-blue-600 transition">Home</a></li>
+                <li><a href="#services" class="hover:text-blue-600 transition">Services</a></li>
+                <li><a href="#portfolio" class="hover:text-blue-600 transition">Portfolio</a></li>
+                <li><a href="#blog" class="hover:text-blue-600 transition">Blog</a></li>
+                <li><a href="#about" class="hover:text-blue-600 transition">About</a></li>
+                <li><a href="#contact" class="hover:text-blue-600 transition">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <div class="container mx-auto px-4 text-center fade-in">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4">Welcome to World Of Visuals</h1>
+            <p class="text-lg md:text-xl mb-6">We bring your ideas to life with stunning designs and innovative solutions.</p>
+            <a href="#contact" class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-100 transition">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 fade-in">Our Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-gray-100 rounded-lg shadow-md fade-in">
+                    <h3 class="text-2xl font-semibold mb-4">Web Design</h3>
+                    <p class="text-gray-600">Crafting visually stunning and user-friendly websites tailored to your brand.</p>
+                </div>
+                <div class="p-6 bg-gray-100 rounded-lg shadow-md fade-in">
+                    <h3 class="text-2xl font-semibold mb-4">Development</h3>
+                    <p class="text-gray-600">Building robust and scalable web applications to meet your business needs.</p>
+                </div>
+                <div class="p-6 bg-gray-100 rounded-lg shadow-md fade-in">
+                    <h3 class="text-2xl font-semibold mb-4">Branding</h3>
+                    <p class="text-gray-600">Creating a unique brand identity that resonates with your audience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 bg-gray-200">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 fade-in">Our Portfolio</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="relative overflow-hidden rounded-lg shadow-md fade-in">
+                    <img src="https://via.placeholder.com/400" alt="Portfolio 1" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                        <p class="text-white text-lg font-semibold">Project One</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-lg shadow-md fade-in">
+                    <img src="https://via.placeholder.com/400" alt="Portfolio 2" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                        <p class="text-white text-lg font-semibold">Project Two</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-lg shadow-md fade-in">
+                    <img src="https://via.placeholder.com/400" alt="Portfolio 3" class="w-full h-64 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                        <p class="text-white text-lg font-semibold">Project Three</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 fade-in">Our Blog</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-gray-100 rounded-lg shadow-md fade-in">
+                    <h3 class="text-2xl font-semibold mb-4">The Future of Web Design</h3>
+                    <p class="text-gray-600 mb-4">Explore the latest trends shaping the future of web design in 2025.</p>
+                    <a href="#" class="text-blue-600 hover:underline">Read More</a>
+                </div>
+                <div class="p-6 bg-gray-100 rounded-lg shadow-md fade-in">
+                    <h3 class="text-2xl font-semibold mb-4">Branding in the Digital Age</h3>
+                    <p class="text-gray-600 mb-4">Learn how to create a memorable brand identity online.</p>
+                    <a href="#" class="text-blue-600 hover:underline">Read More</a>
+                </div>
+                <div class="p-6 bg-gray-100 rounded-lg shadow-md fade-in">
+                    <h3 class="text-2xl font-semibold mb-4">Tips for Scalable Web Apps</h3>
+                    <p class="text-gray-600 mb-4">Best practices for building web applications that grow with your business.</p>
+                    <a href="#" class="text-blue-600 hover:underline">Read More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 fade-in">About Us</h2>
+            <p class="text-lg text-gray-600 text-center max-w-2xl mx-auto fade-in">We are a passionate team of designers and developers dedicated to creating exceptional digital experiences. With years of expertise, we transform ideas into reality.</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-200">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 fade-in">Contact Us</h2>
+            <div class="max-w-lg mx-auto fade-in">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-semibold mb-4">Get in Touch</h3>
+                    <p class="text-gray-600 mb-4">Have a project in mind? Reach out to us!</p>
+                    <p class="text-gray-600">Email: contact@worldofvisuals.com</p>
+                    <p class="text-gray-600">Phone: (123) 456-7890</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2025 World Of Visuals. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Hamburger menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            navLinks.classList.toggle('hidden');
+        });
+
+        // Smooth scrolling for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                // Close mobile menu after clicking
+                if (navLinks.classList.contains('active')) {
+                    hamburger.classList.remove('active');
+                    navLinks.classList.add('hidden');
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+
+        // Fade-in animation on scroll
+        const fadeIns = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        fadeIns.forEach(element => observer.observe(element));
+    </script>
+</body>
+</html>
